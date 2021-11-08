@@ -9,10 +9,7 @@
 
 | Type | Content/Result | Name & Date |
 |:----:| -------------- | ----------- |
-| I |Update for Kevin about content of lab meeting from 04.11.2021
-- Box to unlock the door to next room
-- Has to be placed in a special orientation to be unlockable
-- Unlocking by solving a wiring-challenge on the side of the box | |
+| I |Update for Kevin about content of lab meeting from 04.11.2021<br>- Box to unlock the door to next room<br>- Has to be placed in a special orientation to be unlockable<br>- Unlocking by solving a wiring-challenge on the side of the box | |
 | I | Recapitulation of presented Game-Idea
 | I | Bill of materials has been written by hand | |
 | T | Transfering BOM to octopart | Sanjeev, 11.11.2021 |

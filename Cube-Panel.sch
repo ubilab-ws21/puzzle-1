@@ -1704,6 +1704,7 @@ W = angled&lt;p&gt;
 <part name="R1" library="_Passive" deviceset="WIDERSTAND" device="_0603"/>
 <part name="R2" library="_Passive" deviceset="WIDERSTAND" device="_0603"/>
 <part name="R3" library="_Passive" deviceset="WIDERSTAND" device="_0603"/>
+<part name="R4" library="_Passive" deviceset="WIDERSTAND" device="_1206"/>
 </parts>
 <sheets>
 <sheet>
@@ -1850,6 +1851,7 @@ W = angled&lt;p&gt;
 <instance part="R1" gate="G$1" x="-58.42" y="35.56" rot="R90"/>
 <instance part="R2" gate="G$1" x="-53.34" y="40.64" rot="R90"/>
 <instance part="R3" gate="G$1" x="-53.34" y="30.48" rot="R90"/>
+<instance part="R4" gate="G$1" x="-55.88" y="152.4"/>
 </instances>
 <busses>
 </busses>

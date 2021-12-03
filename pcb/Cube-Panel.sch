@@ -3848,7 +3848,7 @@
 <instance part="P+13" gate="VCC" x="363.22" y="124.46"/>
 <instance part="GND7" gate="1" x="-27.94" y="2.54" rot="R90"/>
 <instance part="P+7" gate="VCC" x="-55.88" y="2.54" rot="R90"/>
-<instance part="R1" gate="G$1" x="-30.48" y="-12.7" rot="R270"/>
+<instance part="R1" gate="G$1" x="-30.48" y="-7.62" rot="R270"/>
 <instance part="R3" gate="G$1" x="-35.56" y="-7.62" rot="R270"/>
 <instance part="X2" gate="G$1" x="-43.18" y="7.62"/>
 <instance part="R285" gate="G$1" x="472.44" y="195.58" rot="R270"/>
@@ -4155,7 +4155,7 @@
 <wire x1="-35.56" y1="0" x2="-35.56" y2="-2.54" width="0.1524" layer="91"/>
 <pinref part="R1" gate="G$1" pin="1"/>
 <wire x1="-35.56" y1="0" x2="-30.48" y2="0" width="0.1524" layer="91"/>
-<wire x1="-30.48" y1="0" x2="-30.48" y2="-7.62" width="0.1524" layer="91"/>
+<wire x1="-30.48" y1="0" x2="-30.48" y2="-2.54" width="0.1524" layer="91"/>
 <wire x1="-35.56" y1="0" x2="-35.56" y2="2.54" width="0.1524" layer="91"/>
 <junction x="-35.56" y="0"/>
 <junction x="-35.56" y="2.54"/>
@@ -4783,19 +4783,6 @@
 <label x="428.752" y="144.526" size="1.27" layer="95" rot="R180"/>
 </segment>
 </net>
-<net name="N$3" class="0">
-<segment>
-<wire x1="-35.56" y1="-25.4" x2="-30.48" y2="-25.4" width="0.1524" layer="91"/>
-<pinref part="R1" gate="G$1" pin="2"/>
-<wire x1="-30.48" y1="-25.4" x2="-30.48" y2="-17.78" width="0.1524" layer="91"/>
-<wire x1="-35.56" y1="-25.4" x2="-38.1" y2="-25.4" width="0.1524" layer="91"/>
-<junction x="-35.56" y="-25.4"/>
-<wire x1="-38.1" y1="-25.4" x2="-38.1" y2="5.08" width="0.1524" layer="91"/>
-<pinref part="X2" gate="G$1" pin="6"/>
-<wire x1="-35.56" y1="-25.4" x2="-35.56" y2="-12.7" width="0.1524" layer="91"/>
-<pinref part="R3" gate="G$1" pin="2"/>
-</segment>
-</net>
 <net name="SERIAL-BUS-TX" class="0">
 <segment>
 <pinref part="IC2" gate="G$1" pin="(DO/ADC1/PCINT1)PA1"/>
@@ -4870,6 +4857,25 @@
 <pinref part="R287" gate="G$1" pin="1"/>
 <wire x1="434.34" y1="177.8" x2="436.88" y2="177.8" width="0.1524" layer="91"/>
 <label x="436.88" y="177.8" size="1.27" layer="95" xref="yes"/>
+</segment>
+</net>
+<net name="ID-SENSE" class="0">
+<segment>
+<pinref part="IC2" gate="G$1" pin="(XTAL1/CLKI/ADC7/!OC1D!/PCINT12)PB4"/>
+<wire x1="424.18" y1="152.4" x2="426.72" y2="152.4" width="0.1524" layer="91"/>
+<label x="426.72" y="152.4" size="1.27" layer="95" xref="yes"/>
+</segment>
+<segment>
+<wire x1="-35.56" y1="-15.24" x2="-30.48" y2="-15.24" width="0.1524" layer="91"/>
+<pinref part="R1" gate="G$1" pin="2"/>
+<wire x1="-30.48" y1="-15.24" x2="-30.48" y2="-12.7" width="0.1524" layer="91"/>
+<wire x1="-35.56" y1="-15.24" x2="-38.1" y2="-15.24" width="0.1524" layer="91"/>
+<junction x="-35.56" y="-15.24"/>
+<wire x1="-38.1" y1="-15.24" x2="-38.1" y2="5.08" width="0.1524" layer="91"/>
+<pinref part="X2" gate="G$1" pin="6"/>
+<wire x1="-35.56" y1="-15.24" x2="-35.56" y2="-12.7" width="0.1524" layer="91"/>
+<pinref part="R3" gate="G$1" pin="2"/>
+<label x="-38.1" y="-17.018" size="1.27" layer="95"/>
 </segment>
 </net>
 </nets>

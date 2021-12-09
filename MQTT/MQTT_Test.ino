@@ -46,7 +46,7 @@ Serial.begin(9600);
   Serial.println("Connected");
   Serial.println("Your IP is");
   Serial.println((WiFi.localIP()));
-  client.setServer("10.119.2.170", 1883);   //192.168.56.1
+  client.setServer("10.119.2.170", 1883);
   client.setCallback(callback);
 
 }

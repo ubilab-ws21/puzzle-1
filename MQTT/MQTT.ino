@@ -1,62 +1,4 @@
-#include <WiFi.h>
-#include <ESPmDNS.h>
-#include <ArduinoOTA.h>
-#include <PubSubClient.h>
-#include <ArduinoJson.h>
-
-// Speed of Serial Communication
-#define SERIAL_COMSPEED 115200
-
-// Credentials for network SSID and PWD
-#define SSID "ubilab"
-#define PWD ""
-
-// Device can be found on the network using this name
-#define NAME "Puzzle1"
-
-// PWD for OTA
-#define OTA_PWD "Cube"
-
-// TCP Client connecting to this server
-// IP or DNS name of TCP Server
-#define SERVER_IP "10.8.166.20"
-// Port of server, should be >= 2000
-#define SERVER_PORT 2000
-void setupOTA();
-void mqttCallback(char*, byte*, unsigned int);
-//const char * puzzleStateToStr(PuzzleState puzzle);
-void puzzleStateChanged();
-void puzzleActive();
-void puzzleSolved();
-void puzzleIdle();
-const char * handleMsg(const char *);
-void handleStream(Stream *);
-
-WiFiClient client;
-
-// MQTT server or DNS
-#define MQTT_SERVER_IP "10.0.0.2"
-// Standard port for MQTT
-#define MQTT_PORT 1883
-// RAW TCP client and pubsub class using it
-
-WiFiClient mqttClient;
-PubSubClient mqtt(mqttClient);
-
-// Global cstring for message building
-#define MSG_SIZE 50
-char msg[MSG_SIZE] = {'\0'};
-
-// Enum and global variable for puzzle state
-enum PuzzleState {
-  idle = 0,
-  active = 1,
-  solved = 2,
-};
-PuzzleState puzzleState = idle;
-
-// JSON dict of given size
-StaticJsonDocument<3 * MSG_SIZE> dict;
+#include <CubePuzzle.h>
 
 // Setup function that runs once upon startup or reboot
 void setup() {
@@ -137,11 +79,17 @@ void loop()
   // Change state from idle to active afterwards cycle between
   // solved and active
   if (puzzleState == idle) {
-    puzzleActive();
+    puzzleIdle();
   } else if (puzzleState == active) {
-    puzzleSolved();
-  } else {
     puzzleActive();
+  } else if (puzzleState == solved){
+    puzzleSolved();
+  }
+  else if (puzzleState == power){
+    puzzlePower();
+  }
+  else if (puzzleState == panelsolved){
+    puzzlePanel();
   }
 
 // If at least one byte is available over serial
@@ -187,12 +135,16 @@ void handleStream(Stream * getter) {
 
 const char * handleMsg(const char * msg) {
   // strcmp returns zero on a match
-  if (strcmp(msg, "solved") == 0) {
-    puzzleSolved();
+  if (strcmp(msg, "idle") == 0) {
+    puzzleIdle();
   } else if (strcmp(msg, "active") == 0) {
     puzzleActive();
-  } else if (strcmp(msg, "idle") == 0) {
-    puzzleIdle();
+  } else if (strcmp(msg, "solved") == 0) {
+    puzzleSolved();
+  } else if (strcmp(msg, "power") == 0) {
+    puzzlePower();
+  } else if (strcmp(msg, "panel") == 0) {
+    puzzlePanel();
   } else {
     return "Unknown command";
   }
@@ -207,17 +159,7 @@ const char * handleMsg(const char * msg) {
 void puzzleIdle() {
   puzzleState = idle;
   // Code to idle puzzle ...
-  puzzleStateChanged();
-}
-
-
-/*
-   Puzzle changes to solved state
-*/
-
-void puzzleSolved() {
-  puzzleState = solved;
-  // Code to set puzzle into solved state ...
+  // Serial.println("Idle State");
   puzzleStateChanged();
 }
 
@@ -229,9 +171,45 @@ void puzzleSolved() {
 void puzzleActive() {
   puzzleState = active;
   // Code to set puzzle into active state ...
+  // Serial.println("Active State");
   puzzleStateChanged();
 }
 
+
+/*
+   Puzzle changes to solved state
+*/
+
+void puzzleSolved() {
+  puzzleState = solved;
+  // Code to set puzzle into solved state ...
+  // Serial.println("Solved State");
+  puzzleStateChanged();
+}
+
+
+/*
+   Puzzle cube is charging
+*/
+
+void puzzlePower() {
+  puzzleState = power;
+  // Code to set puzzle into power state ...
+  // Serial.println("Charging Cube");
+  puzzleStateChanged();
+}
+
+
+/*
+   Panel puzzle changes to solved state
+*/
+
+void puzzlePanel() {
+  puzzleState = panelsolved;
+  // Code to set panel puzzle into solved state ...
+  // Serial.println("Panel puzzle solved");
+  puzzleStateChanged();
+}
 
 /*
    Indicate to others that the state of the
@@ -271,6 +249,8 @@ const char * puzzleStateToStr(PuzzleState puzzle) {
     case active: return "active";
     case idle: return "idle";
     case solved: return "solved";
+    case power: return "power";
+    case panelsolved: return "panelsolved";
     default: return "Unknown state";
   }
 }

@@ -143,7 +143,7 @@ const char * handleMsg(const char * msg) {
     puzzleSolved();
   } else if (strcmp(msg, "power") == 0) {
     puzzlePower();
-  } else if (strcmp(msg, "panel") == 0) {
+  } else if (strcmp(msg, "panelsolved") == 0) {
     puzzlePanel();
   } else {
     return "Unknown command";

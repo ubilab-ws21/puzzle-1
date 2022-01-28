@@ -8,11 +8,6 @@ Description: Game state of the Cube puzzle
 Topic: 1/cube/power
 
 Description: Power status of the cube
- 
- 
-Topic: 1/cube/config
-
-Description: Configure the passcode for the keypad
 
 
 Topic: 1/cube/mintime

@@ -1,5 +1,8 @@
 #include <CubePuzzle.h>
 
+unsigned int min_time = 0;
+unsigned int max_time = 0;
+
 // Setup function that runs once upon startup or reboot
 void setup() {
   // Initialize the Serial Port
@@ -59,7 +62,7 @@ void setup() {
   if (mqtt.connect(NAME)) {
     Serial.println("Connected to MQTT server");
     // Subscribe to a certain topic
-    mqtt.subscribe("Puzzle1/Setup");
+    mqtt.subscribe("1/#");
   } else {
     Serial.println("Cannot connect to MQTT server");
   }
@@ -84,9 +87,6 @@ void loop()
     puzzleActive();
   } else if (puzzleState == solved){
     puzzleSolved();
-  }
-  else if (puzzleState == power){
-    puzzlePower();
   }
   else if (puzzleState == panelsolved){
     puzzlePanel();
@@ -130,20 +130,22 @@ void handleStream(Stream * getter) {
 
 
 /*
-   Handle a received message, may return some answer.
+   Handle a received topic and message, may return some answer.
 */
 
-const char * handleMsg(const char * msg) {
+const char * handleMsg(const char * topic, const char * msg) {
   // strcmp returns zero on a match
-  if (strcmp(msg, "idle") == 0) {
+  if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "idle") == 0) {
     puzzleIdle();
-  } else if (strcmp(msg, "active") == 0) {
+  } else if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "active") == 0) {
     puzzleActive();
-  } else if (strcmp(msg, "solved") == 0) {
+  } else if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "solved") == 0) {
     puzzleSolved();
-  } else if (strcmp(msg, "power") == 0) {
-    puzzlePower();
-  } else if (strcmp(msg, "panelsolved") == 0) {
+  } else if (strcmp(topic, "1/cube/mintime") == 0) {
+    min_time = atoi(msg);
+  } else if (strcmp(topic, "1/cube/maxtime") == 0) {
+    max_time = atoi(msg);
+  } else if (strcmp(topic, "1/panel/state") == 0 && strcmp(msg, "solved") == 0) {
     puzzlePanel();
   } else {
     return "Unknown command";
@@ -189,18 +191,6 @@ void puzzleSolved() {
 
 
 /*
-   Puzzle cube is charging
-*/
-
-void puzzlePower() {
-  puzzleState = power;
-  // Code to set puzzle into power state ...
-  // Serial.println("Charging Cube");
-  puzzleStateChanged();
-}
-
-
-/*
    Panel puzzle changes to solved state
 */
 
@@ -235,7 +225,7 @@ void puzzleStateChanged() {
     // Specify if msg should be retained
     bool retained = true;
     // Publish msg under given topic
-    mqtt.publish("Puzzle1/status", "test"); //"test", retained);                                                                                                                                                                                                                                                                                                                                           , retained);
+    mqtt.publish("1/#", ""); //"test", retained);                                                                                                                                                                                                                                                                                                                                           , retained);
   }
 }
 
@@ -249,7 +239,6 @@ const char * puzzleStateToStr(PuzzleState puzzle) {
     case active: return "active";
     case idle: return "idle";
     case solved: return "solved";
-    case power: return "power";
     case panelsolved: return "panelsolved";
     default: return "Unknown state";
   }

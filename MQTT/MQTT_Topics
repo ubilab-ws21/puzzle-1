@@ -3,11 +3,6 @@ Cube:
 Topic: 1/cube/state
 
 Description: Game state of the Cube puzzle
- 
-
-Topic: 1/cube/power
-
-Description: Power status of the cube
 
 
 Topic: 1/cube/mintime
@@ -20,17 +15,7 @@ Topic: 1/cube/maxtime
 Description: Maximum time for the cube if the sequence is incorrect
 
 
-Topic: 1/cube/autoincrease
-
-Description: Time the cube will lock if the sequence is incorrect (stepwise increase)
-
-
-Topic: 1/cube/sparklecolor
-
-Description: Lighting of the cube 
-
-
-Topic: 1/cube/hint
+Topic: game/puzzle1
 
 Description: Hint(s) for the system
 
@@ -42,7 +27,3 @@ Topic: 1/panel/state
 
 Description: Topic for Cube panels 
 
-
-Topic: 1/panel/hint
-
-Description: Hint(s) for the system

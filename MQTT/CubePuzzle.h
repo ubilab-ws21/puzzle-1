@@ -47,8 +47,7 @@ enum PuzzleState {
   idle = 0,
   active = 1,
   solved = 2,
-  power = 3,
-  panelsolved = 4,
+  panelsolved = 3,
   };
 PuzzleState puzzleState = idle;
 
@@ -63,7 +62,6 @@ void puzzleStateChanged();
 void puzzleActive();
 void puzzleSolved();
 void puzzleIdle();
-void puzzlePower();
 void puzzlePanel();
 const char * handleMsg(const char *);
 void handleStream(Stream *);

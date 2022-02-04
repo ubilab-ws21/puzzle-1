@@ -3,6 +3,8 @@
 unsigned int min_time = 0;
 unsigned int max_time = 0;
 
+StaticJsonDocument<300> doc;
+
 // Setup function that runs once upon startup or reboot
 void setup() {
   // Initialize the Serial Port
@@ -121,7 +123,7 @@ void handleStream(Stream * getter) {
     }
   }
   // Handle given Msg
-  const char * returnMsg = handleMsg(msg);
+  const char * returnMsg = handleMsg(msg, msg);
   // Write something back to stream only if wanted
   if (returnMsg[0] != '\0') {
     getter->println(returnMsg);
@@ -135,9 +137,9 @@ void handleStream(Stream * getter) {
 
 const char * handleMsg(const char * topic, const char * msg) {
   // strcmp returns zero on a match
-  if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "idle") == 0) {
+  if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "off") == 0) {
     puzzleIdle();
-  } else if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "active") == 0) {
+  } else if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "on") == 0) {
     puzzleActive();
   } else if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "solved") == 0) {
     puzzleSolved();
@@ -160,9 +162,11 @@ const char * handleMsg(const char * topic, const char * msg) {
 
 void puzzleIdle() {
   puzzleState = idle;
-  // Code to idle puzzle ...
+  // Code to puzzle state idle...
   // Serial.println("Idle State");
   puzzleStateChanged();
+  mqtt_publish("1/cube","status", "idle");
+  mqtt_publish("game/puzzle1", "status", "idle");
 }
 
 
@@ -175,6 +179,8 @@ void puzzleActive() {
   // Code to set puzzle into active state ...
   // Serial.println("Active State");
   puzzleStateChanged();
+  mqtt_publish("1/cube","status", "active");
+  mqtt_publish("game/puzzle1", "status", "active");
 }
 
 
@@ -187,6 +193,9 @@ void puzzleSolved() {
   // Code to set puzzle into solved state ...
   // Serial.println("Solved State");
   puzzleStateChanged();
+  mqtt_publish("1/cube","status", "solved");
+  mqtt_publish("game/puzzle1", "status", "solved");
+  puzzleState = idle;
 }
 
 
@@ -199,6 +208,9 @@ void puzzlePanel() {
   // Code to set panel puzzle into solved state ...
   // Serial.println("Panel puzzle solved");
   puzzleStateChanged();
+  mqtt_publish("1/panel","status", "panelsolved");
+  mqtt_publish("game/puzzle1", "status", "panelsolved");
+  puzzleState = idle;
 }
 
 /*
@@ -225,7 +237,7 @@ void puzzleStateChanged() {
     // Specify if msg should be retained
     bool retained = true;
     // Publish msg under given topic
-    mqtt.publish("1/#", ""); //"test", retained);                                                                                                                                                                                                                                                                                                                                           , retained);
+    mqtt.publish("puzzle1/status", ""); //"test", retained);                                                                                                                                                                                                                                                                                                                                           , retained);
   }
 }
 
@@ -300,7 +312,18 @@ void mqttCallback(char* topic, byte* message, unsigned int length) {
     const char* newState = dict["state"];
     // If key exists this is not NULL
     if (newState) {
-      handleMsg(newState);
+      handleMsg(newState, topic);
     }
   }
+}
+
+void mqtt_publish(const char* topic, const char* method, const char* state){
+  doc["method"] = method;
+  doc["state"] = state;
+  doc["data"] = 0;
+
+  char JSONmessageBuffer[100];
+
+  serializeJson(doc,JSONmessageBuffer, 100);
+  mqtt.publish(topic, JSONmessageBuffer,true);
 }

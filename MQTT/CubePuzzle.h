@@ -12,7 +12,7 @@
 
 // Credentials for network SSID and PWD
 #define SSID "ubilab"
-#define PWD ""
+#define PWD "escape!"
 
 // Device can be found on the network using this name
 #define NAME "Puzzle1"
@@ -30,7 +30,7 @@
 WiFiClient client;
 
 // MQTT server or DNS
-#define MQTT_SERVER_IP "10.8.166.20"
+#define MQTT_SERVER_IP "10.0.0.2"
 // Standard port for MQTT
 #define MQTT_PORT 1883
 // RAW TCP client and pubsub class using it
@@ -53,7 +53,7 @@ PuzzleState puzzleState = idle;
 
 
 // JSON dict of given size
-StaticJsonDocument<2 * MSG_SIZE> dict;
+StaticJsonDocument<3 * MSG_SIZE> dict;
 
 void setupOTA();
 void mqttCallback(char*, byte*, unsigned int);
@@ -63,7 +63,8 @@ void puzzleActive();
 void puzzleSolved();
 void puzzleIdle();
 void puzzlePanel();
-const char * handleMsg(const char *);
+const char * handleMsg(const char *, const char *);
+void mqtt_publish(const char*, const char*, const char*);
 void handleStream(Stream *);
 
 #endif //CubePuzzle_h

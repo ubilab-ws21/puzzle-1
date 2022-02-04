@@ -12,7 +12,7 @@
 
 // Credentials for network SSID and PWD
 #define SSID "ubilab"
-#define PWD "escape!"
+#define PWD ""
 
 // Device can be found on the network using this name
 #define NAME "Puzzle1"

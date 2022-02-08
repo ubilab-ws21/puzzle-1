@@ -25,7 +25,7 @@
 
 // TCP Client connecting to this server
 // IP or DNS name of TCP Server
-#define SERVER_IP "10.8.166.20" //10.8.166.20
+#define SERVER_IP "10.0.0.2" 
 // Port of server, should be >= 2000
 #define SERVER_PORT 2000
 WiFiClient client;

@@ -1,11 +1,12 @@
 #include <Adafruit_NeoPixel.h>
 #include<Wire.h>
 #include "CubePuzzle.h" // MQTT
-#include <ESP8266WiFi.h>
+
 
 //char *ssid = "BV9900Pro";
-char *ssid = "Mi 11 Lite";
-char *password = "ff799896820f";
+//char *ssid = "Mi 11 Lite";
+//char *password = "ff799896820f";
+
 const uint8_t MPU_address= 104; // the one from uni has 40, the one from Kevin has 104
 
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(67, D5, NEO_GRB + NEO_KHZ800);
@@ -20,8 +21,6 @@ uint8_t seq_cntr = 0;
 uint8_t moved = 0;
 
 // MQTT code variables
-   
-
 
 unsigned int min_time = 0;
 unsigned int max_time = 0;
@@ -30,9 +29,9 @@ StaticJsonDocument<300> doc;
 
 // ______________________________________________________________________
 void setup() {
+  
+  Serial.begin(SERIAL_COMSPEED);
   Wire.begin();
-  Serial.begin(115200);
-
   /*
   Serial.println("\nHowdy!");
   // initialize WIFI
@@ -76,13 +75,14 @@ void setup() {
   Serial.print("Connecting to ");
   Serial.println(SSID);
   // Set name passed to AP while connection
-  mdns::MDns myMdns();
+//  mdns::MDns myMdns();
   WiFi.hostname(NAME);
   // Connect to AP
   WiFi.begin(SSID, PWD);
   // Wait while not connected
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500); Serial.print(".");
+    delay(500);
+    Serial.print(".");
   }
   // Print IP
   Serial.println("\nWiFi connected.\nIP Adress: ");
@@ -93,7 +93,7 @@ void setup() {
      multicast DNS
    *********************/
   // Set name of this device
-  if (!myMdns.begin(NAME)) {
+  if (MDNS.begin(NAME)) {
     Serial.println("Setting up MDNS responder!");
   }
   // The service this device hosts (example)
@@ -151,7 +151,7 @@ void loop () {
   // solved and active
   if (puzzleState == idle) {
     puzzleIdle();
-  } else if (puzzleState == active) {
+  } else if (puzzleState == activ) {
     puzzleActive();
   } else if (puzzleState == solved){
     puzzleSolved();
@@ -170,7 +170,7 @@ void loop () {
     handleStream(&client);
   }
 
-  if (puzzle_active == true){
+  if (puzzleState == activ){
     if(moved == 1) glimmer();
     // read acc data
     Wire.beginTransmission(MPU_address);
@@ -242,7 +242,10 @@ void loop () {
         if(upside == sequence[seq_cntr]) {
           right(upside-1);
           seq_cntr++;
-          if(seq_cntr == 6) Serial.println("Cube has been solved!");
+          if(seq_cntr == 6){
+            Serial.println("Cube has been solved!");
+            puzzleState = solved;
+          }
         } else {
           wrong();
           seq_cntr = 0;
@@ -436,7 +439,7 @@ void puzzleIdle() {
 */
 
 void puzzleActive() {
-  puzzleState = active;
+  puzzleState = activ;
   // Code to set puzzle into active state ...
   // Serial.println("Active State");
   puzzleStateChanged();
@@ -509,7 +512,7 @@ void puzzleStateChanged() {
 
 const char * puzzleStateToStr(PuzzleState puzzle) {
   switch (puzzle) {
-    case active: return "active";
+    case activ: return "active";
     case idle: return "idle";
     case solved: return "solved";
     case panelsolved: return "panelsolved";

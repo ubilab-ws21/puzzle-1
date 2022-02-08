@@ -1,5 +1,6 @@
 #include <WiFi.h>
-#include <ESPmDNS.h>
+//#include <ESPmDNS.h>
+#include "mdns.h"
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>

@@ -1,6 +1,8 @@
-#include <WiFi.h>
+//#include <WiFi.h>
 //#include <ESPmDNS.h>
-#include "mdns.h"
+//#include "mdns.h"
+#include <ESP8266WiFi.h>
+#include <ESP8266mDNS.h>
 #include <ArduinoOTA.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
@@ -23,15 +25,14 @@
 
 // TCP Client connecting to this server
 // IP or DNS name of TCP Server
-#define SERVER_IP "10.8.166.20"
+#define SERVER_IP "10.8.166.20" //10.8.166.20
 // Port of server, should be >= 2000
 #define SERVER_PORT 2000
-
-
 WiFiClient client;
 
+
 // MQTT server or DNS
-#define MQTT_SERVER_IP "10.0.0.2"
+#define MQTT_SERVER_IP "10.8.166.20"
 // Standard port for MQTT
 #define MQTT_PORT 1883
 // RAW TCP client and pubsub class using it
@@ -46,7 +47,7 @@ char msg[MSG_SIZE] = {'\0'};
 // Enum and global variable for puzzle state
 enum PuzzleState {
   idle = 0,
-  active = 1,
+  activ = 1,
   solved = 2,
   panelsolved = 3,
   };

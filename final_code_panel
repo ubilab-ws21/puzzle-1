@@ -254,7 +254,7 @@ void loop () {
     
     delay(50);
   } else {
-    Serial.println("Panel Puzzle is inactive");
+    //Serial.println("Panel Puzzle is inactive");
     delay(1000);
   }
 }
@@ -348,7 +348,7 @@ void handleStream(Stream * getter) {
     }
   }
   // Handle given Msg
-  const char * returnMsg = handleMsg(msg, msg);
+  const char * returnMsg = handleMsg(msg, msg, "", "");
   // Write something back to stream only if wanted
   if (returnMsg[0] != '\0') {
     getter->println(returnMsg);
@@ -360,8 +360,9 @@ void handleStream(Stream * getter) {
    Handle a received topic and message, may return some answer.
 */
 
-const char * handleMsg(const char * msg, const char * topic) {
+const char * handleMsg(const char * state_msg, const char * topic, const char * data, const char * method_msg) {
   // strcmp returns zero on a match
+  /*
   if (strcmp(topic, "1/panel/state") == 0 && strcmp(msg, "deactivate") == 0) {
     puzzleIdle();
   } else if (strcmp(topic, "1/panel/state") == 0 && strcmp(msg, "activate") == 0) {
@@ -371,6 +372,17 @@ const char * handleMsg(const char * msg, const char * topic) {
   } else if (strcmp(topic, "1/panel/state") == 0 && strcmp(msg, "reset_panel") == 0) {
     puzzleIdle();
     puzzleState = idle;
+  } else {
+    return "Unknown command";
+  }
+  return "";
+  */
+  if (strcmp(topic, "1/panel/state") == 0 && strcmp(state_msg,"on") == 0 && strcmp(method_msg, "trigger") == 0 && puzzleStatePrev != activ) {
+    puzzleActive();
+  } else if (strcmp(topic, "1/panel/state")  == 0 && strcmp(state_msg, "off") == 0 && strcmp(method_msg, "trigger") == 0  && strcmp(data, "skipped") == 0 && puzzleStatePrev != solved){
+    puzzleSolved();
+  } else if (strcmp(topic, "1/panel/state")  == 0 && strcmp(state_msg, "off") == 0 && strcmp(method_msg, "trigger") == 0 && puzzleStatePrev != idle) {
+    puzzleIdle();
   } else {
     return "Unknown command";
   }
@@ -441,7 +453,7 @@ void puzzleSolved() {
   // Serial.println("Solved State");
   puzzleStateChanged();
   mqtt_publish("1/panel/state","status", "solved");
-  mqtt_publish("game/puzzle1", "status", "Solved");
+  mqtt_publish("game/puzzle1", "Solved", "");
   //mqtt_publish("1/panel/state", "status", "activate");
 }
 
@@ -542,16 +554,24 @@ void mqttCallback(char* topic, byte* message, unsigned int length) {
   } else {
     Serial.println("Msg is of valid JSON format");
     // Try to extract new state
+    const char* method_msg = dict["method"];
     const char* newState = dict["state"];
+    const char* data_msg = dict["data"];
+    if (!data_msg) {
+      data_msg = "None";
+    }
+    if (!method_msg) {
+      method_msg = "None";
+    }
     // If key exists this is not NULL
     if (newState) {
-      handleMsg(newState, topic);
+      handleMsg(newState, topic, data_msg, method_msg);
     }
   }
 }
 
-void mqtt_publish(const char* topic, const char* method, const char* state){
-  doc["method"] = method;
+void mqtt_publish(const char* topic, const char* method_, const char* state){
+  doc["method"] = method_;
   doc["state"] = state;
   doc["data"] = 0;
 

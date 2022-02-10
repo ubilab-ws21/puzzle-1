@@ -11,8 +11,9 @@
 #define SERIAL_COMSPEED 115200
 
 // Credentials for network SSID and PWD
-#define SSID "ubilab"
-#define PWD "Mo4ienei3thoo7wei4ei"
+#define SSID "ubilab_wifi"
+//#define PWD "Mo4ienei3thoo7wei4ei"
+#define PWD "ohg4xah3oufohreiPe7e"
 
 // Device can be found on the network using this name
 #define NAME "Puzzle1"
@@ -37,7 +38,7 @@ WiFiClient mqttClient;
 PubSubClient mqtt(mqttClient);
 
 // Global cstring for message building
-#define MSG_SIZE 50
+#define MSG_SIZE 100
 char msg[MSG_SIZE] = {'\0'};
 
 // Enum and global variable for puzzle state
@@ -61,7 +62,7 @@ void puzzleStateChanged();
 void puzzleActive();
 void puzzleSolved();
 void puzzleIdle();
-const char * handleMsg(const char *, const char *);
+const char * handleMsg(const char * state_msg, const char * topic, const char * data, const char * method_msg);
 void mqtt_publish(const char*, const char*, const char*);
 void handleStream(Stream *);
 

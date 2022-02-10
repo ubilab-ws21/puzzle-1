@@ -34,11 +34,17 @@ void setup() {
     led_sum_max += led_count[i];
   }
   Kbus.println("D1=__");
+  delay(50);
   Kbus.println("D2=__");
+  delay(50);
   Kbus.println("D3=__");
+  delay(50);
   Kbus.println("D4=__");
+  delay(50);
   Kbus.println("D5=__");
+  delay(50);
   Kbus.println("D6=__");
+  delay(50);
   
   Serial.println("Setup done");
   delay(2000);
@@ -102,11 +108,17 @@ void loop () {
     }
     strip.show();
     Kbus.println("D1=__");
+    delay(75);
     Kbus.println("D2=_1.");
+    delay(75);
     Kbus.println("D3=_9.");
+    delay(75);
     Kbus.println("D4=_5.");
+    delay(75);
     Kbus.println("D5=_6.");
+    delay(75);
     Kbus.println("D6=__");
+    delay(75);
     led++;
   } else if(led >= led_sum) {
     uint8_t col = 0x10;
@@ -127,7 +139,6 @@ void loop () {
     }
     while(n <= led && n < 10) {
       if(led-n < 100) strip.setPixelColor(led-n, (0xff>>n), 0, (0xff>>n));
-      //if(led-n < 100 && solved == 1) strip.setPixelColor(led-n, (0xff>>n), 0x0f, (0xff>>n));
       n++;
     }
     led = (led+1)%100;

@@ -1,7 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <Adafruit_NeoPixel.h>
 #include <SoftwareSerial.h>
-#include "final_code_panel_header.h"
+#include "./final_code_panel_header.h"
 
 SoftwareSerial Kbus(D1, D0);
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(100, D5, NEO_GRB + NEO_KHZ800);

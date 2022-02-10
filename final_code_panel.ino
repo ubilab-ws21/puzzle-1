@@ -1,9 +1,9 @@
 #include <ESP8266WiFi.h>
 #include <Adafruit_NeoPixel.h>
 #include <SoftwareSerial.h>
-#include "PanelPuzzle.h"
+#include "final_code_panel_header.h"
 
-SoftwareSerial Kbus(D3, D0);
+SoftwareSerial Kbus(D1, D0);
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(100, D5, NEO_GRB + NEO_KHZ800);
 
 uint8_t led_count[8] = {8, 10, 12, 10, 7, 14, 14, 8};

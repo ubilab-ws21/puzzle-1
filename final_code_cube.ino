@@ -1,14 +1,6 @@
 #include <Adafruit_NeoPixel.h>
 #include<Wire.h>
-#include "CubePuzzle.h" // MQTT
-
-
-//char *ssid = "BV9900Pro";
-//char *ssid = "Mi 11 Lite";
-//char *password = "ff799896820f";
-
-#define STASSID "HeisserPunkt2"
-#define STAPSK  "Wlan0815"
+#include "final_code_cube_header.h" // MQTT
 
 const uint8_t MPU_address= 104; // the one from uni has 40, the one from Kevin has 104
 

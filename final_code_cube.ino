@@ -21,7 +21,8 @@ int reset = 21;
 
 uint8_t sequence[6] = {2,6,4,3,5,1};
 uint8_t seq_cntr = 0;
-uint8_t moved = 0; uint8_t moved_before = 0;
+uint8_t moved = 0;
+uint8_t moved_before = 0;
 
 // MQTT code variables
 
@@ -191,14 +192,15 @@ void loop () {
   if (puzzleState == activ){
     if(moved == 1) glimmer();
     if (moved == 1 && moved_before == 0){
-      mqtt_publish_hint("game/puzzle1", "Hint", "get the right sequence");
+      //mqtt_publish_hint("game/puzzle1", "Hint", "get the right sequence");
+      mqtt_publish_hint("game/puzzle1", "Hint2", "");
     }
     // read acc data
     Wire.beginTransmission(MPU_address);
     Wire.write(0x3B);
     Wire.endTransmission();
     Wire.requestFrom(MPU_address, 6);
-    while(Wire.available() < 6);
+    while(Wire.available() < 6) Serial.println("waiting for data");
     tmp = Wire.read() << 8 | Wire.read();
     int32_t accX_raw = tmp;
     tmp = Wire.read() << 8 | Wire.read();
@@ -229,16 +231,16 @@ void loop () {
       accDefault[1] = accY_raw;
       accDefault[2] = accZ_raw;
     } else if(moved == 0 && (accX_raw > moveThres + accDefault[0] || accDefault[0] > moveThres +accX_raw)) {
-        moved = 1;
-        Serial.println("I was moved!!! *_*");
-        delay(3000);
+      moved = 1;
+      Serial.println("I was moved!!! *_*");
+      delay(3000);
     }else if(moved == 0 && (accY_raw > moveThres+accDefault[1] || accDefault[1] > moveThres+accY_raw)) {
       moved = 1;
-      //Serial.println("I was moved Y!!! *_*");
+      Serial.println("I was moved Y!!! *_*");
       delay(3000);
     } else if(moved == 0 && (accZ_raw > moveThres+accDefault[2] || accDefault[2] > moveThres+accZ_raw)) {
       moved = 1;
-      //Serial.println("I was moved Z!!! *_*");
+      Serial.println("I was moved Z!!! *_*");
       delay(3000);
     }
 
@@ -422,7 +424,7 @@ void handleStream(Stream * getter) {
     }
   }
   // Handle given Msg
-  const char * returnMsg = handleMsg(msg, msg);
+  const char * returnMsg = handleMsg(msg, msg, "", "");
   // Write something back to stream only if wanted
   if (returnMsg[0] != '\0') {
     getter->println(returnMsg);
@@ -434,8 +436,9 @@ void handleStream(Stream * getter) {
    Handle a received topic and message, may return some answer.
 */
 
-const char * handleMsg(const char * msg, const char * topic) {
+const char * handleMsg(const char * state_msg, const char * topic, const char * data, const char * method_msg) {
   // strcmp returns zero on a match
+  /*
   if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "deactivate") == 0) {
     puzzleIdle();
   } else if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "activate") == 0) {
@@ -450,6 +453,17 @@ const char * handleMsg(const char * msg, const char * topic) {
     return "Unknown command";
   }
   return "";
+  */
+  if (strcmp(topic, "1/cube/state") == 0 && strcmp(state_msg,"on") == 0 && strcmp(method_msg, "trigger") == 0 && puzzleStatePrev != activ) {
+    puzzleActive();
+  } else if (strcmp(topic, "1/cube/state")  == 0 && strcmp(state_msg, "off") == 0 && strcmp(method_msg, "trigger") == 0  && strcmp(data, "skipped") == 0 && puzzleStatePrev != solved){
+    puzzleSolved();
+  } else if (strcmp(topic, "1/cube/state")  == 0 && strcmp(state_msg, "off") == 0 && strcmp(method_msg, "trigger") == 0 && puzzleStatePrev != idle) {
+    puzzleIdle();
+  } else {
+    return "Unknown command";
+  }
+  return "";
 }
 
 
@@ -459,8 +473,6 @@ const char * handleMsg(const char * msg, const char * topic) {
 
 void puzzleIdle() {
   puzzleState = idle;
-  // Code to puzzle state idle...
-  // Serial.println("Idle State");
   puzzleStateChanged();
   mqtt_publish("1/cube/state","status", "off");
   mqtt_publish("game/puzzle1", "status", "off");
@@ -490,7 +502,8 @@ void puzzleActive() {
   puzzleStateChanged();
   mqtt_publish("1/cube/state","status", "on");
   mqtt_publish("game/puzzle1", "status", "on");
-  mqtt_publish_hint("game/puzzle1", "Hint", "Find the panels");
+  //mqtt_publish_hint("game/puzzle1", "Hint", "Find the panels");
+  mqtt_publish_hint("game/puzzle1", "Hint1", "");
 }
 
 
@@ -504,8 +517,10 @@ void puzzleSolved() {
   // Serial.println("Solved State");
   puzzleStateChanged();
   mqtt_publish("1/cube/state","status", "solved");
-  mqtt_publish("1/panel/state", "status", "activate");
-  mqtt_publish_hint("game/puzzle1", "Hint", "find the correct path");
+  mqtt_publish("1/panel/state", "trigger", "on");
+  //mqtt_publish_hint("game/puzzle1", "Hint", "find the correct path");
+  mqtt_publish_hint("game/puzzle1", "Hint3", "");
+  mqtt_publish("1/panel/state", "trigger", "on");
   puzzleState = idle;
   for (int x=0; x<67; x++) {
     strip.setPixelColor(x, 0);
@@ -616,16 +631,24 @@ void mqttCallback(char* topic, byte* message, unsigned int length) {
   } else {
     Serial.println("Msg is of valid JSON format");
     // Try to extract new state
+    const char* method_msg = dict["method"];
     const char* newState = dict["state"];
+    const char* data_msg = dict["data"];
+    if (!data_msg) {
+      data_msg = "None";
+    }
+    if (!method_msg) {
+      method_msg = "None";
+    }
     // If key exists this is not NULL
     if (newState) {
-      handleMsg(newState, topic);
+      handleMsg(newState, topic, data_msg, method_msg);
     }
   }
 }
 
-void mqtt_publish_hint(const char* topic, const char* method, const char* state) {
-  doc["method"] = method;
+void mqtt_publish_hint(const char* topic, const char* method_, const char* state) {
+  /*doc["method"] = method_;
   doc["Hint"] = state;
   doc["data"] = 0;
 
@@ -633,10 +656,11 @@ void mqtt_publish_hint(const char* topic, const char* method, const char* state)
 
   serializeJson(doc,JSONmessageBuffer, 100);
   mqtt.publish(topic, JSONmessageBuffer,true);
+  */
 }
 
-void mqtt_publish(const char* topic, const char* method, const char* state){
-  doc["method"] = method;
+void mqtt_publish(const char* topic, const char* method_, const char* state){
+  doc["method"] = method_;
   doc["state"] = state;
   doc["data"] = 0;
 

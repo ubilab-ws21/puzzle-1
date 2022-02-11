@@ -210,21 +210,21 @@ void loop () {
       // Puzzle finalized, do not do shit.
     } else if(led == led_sum_max) {
       for (int x=0; x<100; x++) {
-        strip.setPixelColor(x, 0, 0x40, 0);
+        strip.setPixelColor(x, 0, 0x0f, 0);
       }
       strip.show();
       Kbus.println("D1=__");
-      delay(75);
+      delay(100);
       Kbus.println("D2=_1.");
-      delay(75);
+      delay(333);
       Kbus.println("D3=_9.");
-      delay(75);
+      delay(333);
       Kbus.println("D4=_5.");
-      delay(75);
+      delay(333);
       Kbus.println("D5=_6.");
-      delay(75);
+      delay(100);
       Kbus.println("D6=__");
-      delay(75);
+      delay(100);
       led++;
       puzzleState = solved;
     } else if(led >= led_sum) {

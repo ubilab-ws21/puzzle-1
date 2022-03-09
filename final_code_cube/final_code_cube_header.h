@@ -16,11 +16,12 @@
 
 // Credentials for network SSID and PWD
 #define SSID "ubilab_wifi"
+//#define SSID "ubilab"
 //#define PWD "Mo4ienei3thoo7wei4ei"
 #define PWD "ohg4xah3oufohreiPe7e"
 
 // Device can be found on the network using this name
-#define NAME "Puzzle1"
+#define NAME "Puzzle1_cube"
 
 // PWD for OTA
 #define OTA_PWD "Cube"

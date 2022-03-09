@@ -16,7 +16,7 @@
 #define PWD "ohg4xah3oufohreiPe7e"
 
 // Device can be found on the network using this name
-#define NAME "Puzzle1"
+#define NAME "Puzzle1_panel"
 
 // PWD for OTA
 #define OTA_PWD "Cube"

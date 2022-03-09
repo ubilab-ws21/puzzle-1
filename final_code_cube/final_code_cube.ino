@@ -17,9 +17,7 @@ uint8_t moved = 0;
 uint8_t moved_before = 0;
 
 // MQTT code variables
-
-unsigned int min_time = 0;
-unsigned int max_time = 0;
+bool mqtt_hint2_sent = false;
 
 StaticJsonDocument<300> doc;
 
@@ -136,6 +134,7 @@ void setup() {
     Serial.println("Connected to MQTT server");
     // Subscribe to a certain topic
     mqtt.subscribe("1/#");
+    mqtt.subscribe("game/#");
   } else {
     Serial.println("Cannot connect to MQTT server");
   }
@@ -183,9 +182,10 @@ void loop () {
 
   if (puzzleState == activ){
     if(moved == 1) glimmer();
-    if (moved == 1 && moved_before == 0){
+    if (moved == 1 && moved_before == 0 && mqtt_hint2_sent == false){
       //mqtt_publish_hint("game/puzzle1", "Hint", "get the right sequence");
       mqtt_publish_hint("game/puzzle1", "Hint2", "");
+      mqtt_hint2_sent = true;
     }
     // read acc data
     Wire.beginTransmission(MPU_address);
@@ -283,6 +283,7 @@ void loop () {
     }
   }else{
     Serial.println("puzzle is inactive");
+    delay(500);
   }
   // Just some delay to not spam the terminal
   delay(50);
@@ -324,6 +325,10 @@ void wrong() {
     strip.show();
     delay(100);
   }
+  if (dickhead_counter > 10) {
+    dickhead_counter = 10;
+  }
+  
   delay(1000*dickhead_counter);
   dickhead_counter++;
   glimmer();
@@ -480,6 +485,7 @@ void puzzleIdle() {
   seq_cntr = 0;
   moved = 0;
   moved_before = 0;
+  mqtt_hint2_sent = false;
 }
 
 
@@ -524,6 +530,7 @@ void puzzleSolved() {
   }
   seq_cntr = 0;
   moved = 0;
+  mqtt_hint2_sent = false;
 }
 
 
@@ -643,12 +650,13 @@ void mqtt_publish_hint(const char* topic, const char* method_, const char* state
   /*doc["method"] = method_;
   doc["Hint"] = state;
   doc["data"] = 0;
-
   char JSONmessageBuffer[100];
-
   serializeJson(doc,JSONmessageBuffer, 100);
-  mqtt.publish(topic, JSONmessageBuffer,true);
   */
+  
+  //mqtt.publish(topic, JSONmessageBuffer,true);
+  mqtt.publish(topic, method_);
+  
 }
 
 void mqtt_publish(const char* topic, const char* method_, const char* state){

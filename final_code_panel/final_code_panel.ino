@@ -13,6 +13,7 @@ uint8_t analog[6] = {0};
 
 uint8_t respTry = 0;
 uint8_t respPanel = 0;
+void handleKbus(Stream *stream);
 void checkKbusMessage(char *msg);
 void checkKbusDevices(void);
 void checkKbusDevice(uint8_t panelNr);
@@ -119,7 +120,7 @@ void setup() {
   Serial.println("Setup for MQTT done!");
 
   
-  delay(2000);
+  delay(100);
 }
 
 
@@ -163,46 +164,36 @@ void loop () {
   
   if (puzzleState == activ) {
   
-    while(Kbus.available()) {
-      KbusBuffer[KbusPtr] = Kbus.read();
-      Serial.print(KbusBuffer[KbusPtr]);
-      if(KbusBuffer[KbusPtr] == '\n') {
-        checkKbusMessage(KbusBuffer);
-        while(KbusPtr>0) {
-          KbusBuffer[KbusPtr] = 0;
-          KbusPtr--;
-        }
-      } else {
-        KbusPtr++;
-      }
+    if(Kbus.available()) {
+      handleKbus(&Kbus);
     }
     
     if(led == 0) {
       panels = 0x81;
       led_sum = 0;
       curr_panel = 0;
+      // Check if all panels are there: @@@
       delay(500);
     }
   
     // Set new Panel and check if next panel exists
-    if(led == led_sum) {
+    if(respTry == 0 && curr_panel < 8) {
       if(panels&(1<<curr_panel)) {
         // Panel Exists, extend light and ask for next panel
         led_sum += led_count[curr_panel];
         curr_panel++;
-        respTry = 4; // Up to 4 Retries of communication.
+        respTry = 7; // Up to 7 Retries of communication.
         checkKbusDevice(curr_panel);
       } else {
         // Panel does not exist, FAIL HERE!
       }
+    } else if(respTry >= 0) {
+      if(respTry > 0) {
+        respTry--;
+        checkKbusDevice(curr_panel);
+      }
     }
     
-    /*if(led == 8) { // When reaching 8 we should know which panels are there
-      for(uint8_t i=1; i<8; i++) {
-        if(panels&(1<<i)) led_sum += led_count[i];
-        else break;
-      }
-    }*/
     int8_t n = 0;
   
     // Light has reached the end 
@@ -279,24 +270,25 @@ void checkKbusMessage(char *msg) {
       Serial.print(*(msg+1));
       Serial.print(", Value: ");
       Serial.println(analog[*(msg+1)-'1']);
+      if(*(msg+1) != '0' + curr_panel) return;
       switch(*(msg+1)) { // Check if the module is in the correct place.
         case '1':
-          if(tmp >= 0 && tmp <= 1) panels |= (1<<(*(msg+1)-'0'));
+          if(tmp >= 0 && tmp <= 1) { panels |= (1<<(*(msg+1)-'0')); respTry = 0; }
           break;
         case '2':
-          if(tmp >= 2 && tmp <= 4) panels |= (1<<(*(msg+1)-'0'));
+          if(tmp >= 2 && tmp <= 4) { panels |= (1<<(*(msg+1)-'0')); respTry = 0; }
           break;
         case '3':
-          if(tmp >= 5 && tmp <= 7) panels |= (1<<(*(msg+1)-'0'));
+          if(tmp >= 5 && tmp <= 7) { panels |= (1<<(*(msg+1)-'0')); respTry = 0; }
           break;
         case '4':
-          if(tmp >= 8 && tmp <= 10) panels |= (1<<(*(msg+1)-'0'));
+          if(tmp >= 8 && tmp <= 10) { panels |= (1<<(*(msg+1)-'0')); respTry = 0; }
           break;
         case '5':
-          if(tmp >= 11 && tmp <= 13) panels |= (1<<(*(msg+1)-'0'));
+          if(tmp >= 11 && tmp <= 13) { panels |= (1<<(*(msg+1)-'0')); respTry = 0; }
           break;
         case '6':
-          if(tmp >= 14 && tmp <= 16) panels |= (1<<(*(msg+1)-'0'));
+          if(tmp >= 14 && tmp <= 16) { panels |= (1<<(*(msg+1)-'0')); respTry = 0; }
           break;
           
       }
@@ -355,6 +347,21 @@ void handleStream(Stream * getter) {
   }
 }
 
+void handleKbus(Stream *stream) {
+  while(stream->available()) {
+    KbusBuffer[KbusPtr] = stream->read();
+    Serial.print(KbusBuffer[KbusPtr]);
+    if(KbusBuffer[KbusPtr] == '\n') {
+      checkKbusMessage(KbusBuffer);
+      while(KbusPtr>0) {
+        KbusBuffer[KbusPtr] = 0;
+        KbusPtr--;
+      }
+    } else {
+      KbusPtr++;
+    }
+  }
+}
 
 /*
    Handle a received topic and message, may return some answer.
@@ -399,7 +406,6 @@ void puzzleIdle() {
   // Code to puzzle state idle...
   // Serial.println("Idle State");
   puzzleStateChanged();
-  mqtt_publish("1/panel/state","status", "off");
   //mqtt_publish("game/puzzle1", "status", "off");
   puzzleState = idle;
   led = 0;
@@ -414,18 +420,23 @@ void puzzleIdle() {
   for(uint8_t i=0; i<sizeof(led_count); i++) {
     led_sum_max += led_count[i];
   }
-  Kbus.println("D1=__");
-  delay(75);
-  Kbus.println("D2=__");
-  delay(75);
-  Kbus.println("D3=__");
-  delay(75);
-  Kbus.println("D4=__");
-  delay(75);
-  Kbus.println("D5=__");
-  delay(75);
-  Kbus.println("D6=__");
-  delay(75);
+  // Reset Displays, do it twice to play it safe.
+  for(uint8_t i=0; i<2; i++) {
+    Kbus.println("D1=__");
+    delay(75);
+    Kbus.println("D2=__");
+    delay(75);
+    Kbus.println("D3=__");
+    delay(75);
+    Kbus.println("D4=__");
+    delay(75);
+    Kbus.println("D5=__");
+    delay(75);
+    Kbus.println("D6=__");
+    delay(75);    
+  }
+
+  mqtt_publish("1/panel/state","status", "off");
 }
 
 

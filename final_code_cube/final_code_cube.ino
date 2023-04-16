@@ -225,23 +225,17 @@ void loop () {
     } else if(moved == 0 && (accX_raw > moveThres + accDefault[0] || accDefault[0] > moveThres +accX_raw)) {
       moved = 1;
       Serial.println("I was moved!!! *_*");
-      delay(3000);
+      delay(250);
     }else if(moved == 0 && (accY_raw > moveThres+accDefault[1] || accDefault[1] > moveThres+accY_raw)) {
       moved = 1;
       Serial.println("I was moved Y!!! *_*");
-      delay(3000);
+      delay(250);
     } else if(moved == 0 && (accZ_raw > moveThres+accDefault[2] || accDefault[2] > moveThres+accZ_raw)) {
       moved = 1;
       Serial.println("I was moved Z!!! *_*");
-      delay(3000);
+      delay(250);
     }
-
-  
-    // printing raw data
-    /*Serial.print(accX_raw); Serial.print("\t");
-    Serial.print(accY_raw); Serial.print("\t");
-    Serial.print(accZ_raw); Serial.print("\t");
-    Serial.print(accDir&0x08); Serial.println("\t");*/
+    
     switch(accDir&0x07) {
       case 0x04:
         upside = (accDir&0x40) ? 1 : 6;
@@ -435,22 +429,6 @@ void handleStream(Stream * getter) {
 
 const char * handleMsg(const char * state_msg, const char * topic, const char * data, const char * method_msg) {
   // strcmp returns zero on a match
-  /*
-  if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "deactivate") == 0) {
-    puzzleIdle();
-  } else if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "activate") == 0) {
-    puzzleActive();
-  } else if (strcmp(topic, "1/cube/state") == 0 && strcmp(msg, "solved_cube") == 0) {
-    puzzleSolved();
-  } else if (strcmp(topic, "1/cube/mintime") == 0) {
-    min_time = atoi(msg);
-  } else if (strcmp(topic, "1/cube/maxtime") == 0) {
-    max_time = atoi(msg);
-  } else {
-    return "Unknown command";
-  }
-  return "";
-  */
   if (strcmp(topic, "1/cube/state") == 0 && strcmp(state_msg,"on") == 0 && strcmp(method_msg, "trigger") == 0 && puzzleStatePrev != activ) {
     puzzleActive();
   } else if (strcmp(topic, "1/cube/state")  == 0 && strcmp(state_msg, "off") == 0 && strcmp(method_msg, "trigger") == 0  && strcmp(data, "skipped") == 0 && puzzleStatePrev != solved){
@@ -514,8 +492,8 @@ void puzzleSolved() {
   // Code to set puzzle into solved state ...
   // Serial.println("Solved State");
   puzzleStateChanged();
-  mqtt_publish("1/cube/state","status", "solved");
   mqtt_publish("1/panel/state", "trigger", "on");
+  mqtt_publish("1/cube/state","status", "solved");
   //mqtt_publish_hint("game/puzzle1", "Hint", "find the correct path");
   mqtt_publish_hint("game/puzzle1", "Hint3", "");
   mqtt_publish("1/panel/state", "trigger", "on");
@@ -647,13 +625,6 @@ void mqttCallback(char* topic, byte* message, unsigned int length) {
 }
 
 void mqtt_publish_hint(const char* topic, const char* method_, const char* state) {
-  /*doc["method"] = method_;
-  doc["Hint"] = state;
-  doc["data"] = 0;
-  char JSONmessageBuffer[100];
-  serializeJson(doc,JSONmessageBuffer, 100);
-  */
-  
   //mqtt.publish(topic, JSONmessageBuffer,true);
   mqtt.publish(topic, method_);
   
